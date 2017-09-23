@@ -8,7 +8,12 @@
 #
 from __future__ import unicode_literals
 
+from mo_dots import Data
+
+from mo_hg.hg_mozilla_org import HgMozillaOrg
 import re
+
+import json
 
 import numpy as np
 from mo_logs import Log
@@ -29,13 +34,21 @@ MOVE = {
 }
 no_change = MOVE[' ']
 
+class temporal:
+    def __init__(self,TID,rev,file,line):
+        self.TID = TID
+        self.rev = rev
+        self.file = file
+        self.line = line
+
+
 
 def parse_changeset_to_matrix(branch, changeset_id, new_source_code=None):
     """
-    :param branch:  Data with `url` parameter pointing to hg instance 
-    :param changeset_id:   
-    :param new_source_code:  for testing - provide the resulting file (for file length only) 
-    :return: 
+    :param branch:  Data with `url` parameter pointing to hg instance
+    :param changeset_id:
+    :param new_source_code:  for testing - provide the resulting file (for file length only)
+    :return:
     """
     diff = _get_changeset(branch, changeset_id)
     map = _parse_diff(diff, new_source_code)
@@ -44,9 +57,9 @@ def parse_changeset_to_matrix(branch, changeset_id, new_source_code=None):
 
 def parse_diff_to_matrix(diff, new_source_code=None):
     """
-    :param diff:  textual diff 
-    :param new_source_code:  for testing - provide the resulting file (for file length only) 
-    :return: 
+    :param diff:  textual diff
+    :param new_source_code:  for testing - provide the resulting file (for file length only)
+    :return:
     """
     return _map_to_matrix(_parse_diff(diff, new_source_code))
 
@@ -64,7 +77,7 @@ def _map_to_matrix(map):
 def parse_to_map(branch, changeset_id):
     """
     MATRICIES ARE O(n^2), WE NEED A O(n) SOLUTION
-    
+
     :param branch: OBJECT TO DESCRIBE THE BRANCH TO PULL INFO
     :param changeset_id: THE REVISION NUMEBR OF THE CHANGESET
     :return:  MAP FROM FULL PATH TO OPERATOR
@@ -79,12 +92,17 @@ def parse_to_map(branch, changeset_id):
         output[file_path] = matrix.T
     return output
 
+def get_source_code(branch, changeset_id, file_path):
+    f = open('config.json', 'w')
+    hg = HgMozillaOrg(json.loads(f.read()))
+    hg._get_source_code_from_hg(Data(branch=branch, changeset=changeset_id), file_path)
+
 
 def _parse_diff(changeset, new_source_code=None):
     """
     :param branch: OBJECT TO DESCRIBE THE BRANCH TO PULL INFO
     :param changeset: THE DIFF TEXT CONTENT
-    :param new_source_code:  for testing - provide the resulting file (for file length only) 
+    :param new_source_code:  for testing - provide the resulting file (for file length only)
     :return:  MAP FROM FULL PATH TO LIST OF COORINATES
     """
     output = {}
@@ -119,7 +137,7 @@ def _parse_diff(changeset, new_source_code=None):
         # WE ONLY NEED THE NUMBER OF CODE LINES SO WE KNOW THE CODE DIMENSIONS SO WE CAN MAKE THE MATRIX
         # A MORE EFFICIENT IMPLEMENTATION COULD WORK WITHOUT KNOWING THE LENGTH OF THE SOURCE
         if new_source_code is None:
-            new_length = len(get_source_code(branch, changeset_id, file_path))
+            new_length = len(get_source_code("mozilla-central",changeset,file_path))
         else:
             new_length = len(new_source_code)
 
