@@ -46,8 +46,7 @@ class TestParsing(FuzzyTestCase):
         file3 = File("tests/resources/example_file_v3.py").read().split('\n')
 
         c1 = parse_diff_to_matrix(
-            diff=File("tests/resources/diff1.patch").read(),
-            new_source_code=file2
+            diff=File("tests/resources/diff1.patch").read()
         )["/tests/resources/example_file.py"]
 
         c2 = parse_diff_to_matrix(

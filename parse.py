@@ -93,8 +93,9 @@ def parse_to_map(branch, changeset_id):
     return output
 
 def get_source_code(branch, changeset_id, file_path):
-    f = open('config.json', 'w')
-    hg = HgMozillaOrg(json.loads(f.read()))
+    f = open('config.json', 'r')
+    r = f.read()
+    hg = HgMozillaOrg(json.loads(r))
     hg._get_source_code_from_hg(Data(branch=branch, changeset=changeset_id), file_path)
 
 
@@ -137,7 +138,10 @@ def _parse_diff(changeset, new_source_code=None):
         # WE ONLY NEED THE NUMBER OF CODE LINES SO WE KNOW THE CODE DIMENSIONS SO WE CAN MAKE THE MATRIX
         # A MORE EFFICIENT IMPLEMENTATION COULD WORK WITHOUT KNOWING THE LENGTH OF THE SOURCE
         if new_source_code is None:
-            new_length = len(get_source_code("mozilla-central",changeset,file_path))
+            try:
+                new_length = len(get_source_code("mozilla-central",changeset,file_path))
+            except Exception as e:
+                print(e)
         else:
             new_length = len(new_source_code)
 
