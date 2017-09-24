@@ -68,6 +68,9 @@ FILE_URL = "{{location}}/raw-file/{{rev}}{{path}}"
 
 last_called_url = {}
 
+def _count(values):
+    return len(list(values))
+
 
 class HgMozillaOrg(object):
     """
@@ -457,6 +460,7 @@ class HgMozillaOrg(object):
             return int(match[0])
         return None
 
+
     def _get_json_diff_from_hg(self, revision):
         """
         :param revision: INCOMPLETE REVISION OBJECT
@@ -490,7 +494,7 @@ class HgMozillaOrg(object):
                 response = http.get(url)
                 diff = response.content.decode("utf8", "replace")
                 json_diff = diff_to_json(diff)
-                num_changes = jx.count(c for f in json_diff for c in f.changes)
+                num_changes = _count(c for f in json_diff for c in f.changes)
                 if json_diff:
                     if num_changes < MAX_DIFF_SIZE:
                         return json_diff
